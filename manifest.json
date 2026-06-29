@@ -1,0 +1,30 @@
+{
+  "name": "KIWI Voice Assistant",
+  "version": "4.0.0",
+  "home_assistant_domain": "kiwi",
+  "funding_url": "https://github.com/your-username/kiwi",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP32-S3",
+      "parts": [
+        {
+          "path": "bins/bootloader.bin",
+          "offset": 0
+        },
+        {
+          "path": "bins/partitions.bin",
+          "offset": 32768
+        },
+        {
+          "path": "bins/boot_app0.bin",
+          "offset": 57344
+        },
+        {
+          "path": "bins/firmware.bin",
+          "offset": 65536
+        }
+      ]
+    }
+  ]
+}

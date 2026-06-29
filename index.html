@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KIWI Firmware Flasher</title>
+  <script
+    type="module"
+    src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"
+  ></script>
+  <style>
+    :root {
+      --green:    #5cb85c;
+      --green-dk: #3d8b3d;
+      --bg:       #0d0d0d;
+      --card:     #161616;
+      --border:   #2a2a2a;
+      --text:     #e8e8e8;
+      --muted:    #777;
+      --accent:   #7fff5f;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      max-width: 480px;
+      width: 100%;
+      padding: 40px 36px;
+      box-shadow: 0 0 60px rgba(92,184,92,0.07);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+    }
+
+    /* ---- Kiwi Bird SVG Logo ---- */
+    .logo-wrap {
+      width: 88px; height: 88px;
+      background: #111;
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .logo-wrap::after {
+      content: '';
+      position: absolute;
+      inset: -5px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      border-top-color: var(--accent);
+      animation: spin 3s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .title-block { text-align: center; }
+    .title-block h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: var(--accent);
+    }
+    .title-block p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 6px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* ---- Steps ---- */
+    .steps {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: #1c1c1c;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .step-num {
+      width: 26px; height: 26px;
+      min-width: 26px;
+      background: var(--green-dk);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step-text { font-size: 0.88rem; line-height: 1.5; color: #ccc; }
+    .step-text strong { color: var(--text); }
+
+    /* ---- Flash Button (esp-web-tools styles it, we override wrapper) ---- */
+    .flash-wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    esp-web-install-button {
+      --esp-tools-button-color: #fff;
+      --esp-tools-button-background: var(--green);
+      --esp-tools-button-color-hover: #fff;
+      --esp-tools-button-background-hover: var(--green-dk);
+      width: 100%;
+    }
+
+    /* force the internal button to full width */
+    esp-web-install-button::part(button) {
+      width: 100%;
+      padding: 16px;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      background: var(--green);
+      color: #fff;
+      transition: background 0.2s;
+    }
+    esp-web-install-button::part(button):hover {
+      background: var(--green-dk);
+    }
+
+    /* browser-not-supported notice */
+    esp-web-install-button[install-unsupported] {
+      display: block;
+    }
+    .browser-warn {
+      display: none;
+      background: #2a1a00;
+      border: 1px solid #7a4a00;
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 0.82rem;
+      color: #ffcc66;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .hint {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.6;
+    }
+    .hint a { color: var(--accent); text-decoration: none; }
+    .hint a:hover { text-decoration: underline; }
+
+    /* ---- Version badge ---- */
+    .badge {
+      font-size: 0.7rem;
+      background: #1e2e1e;
+      color: var(--accent);
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--green-dk);
+      letter-spacing: 1px;
+    }
+
+    footer {
+      margin-top: 32px;
+      font-size: 0.72rem;
+      color: #444;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- Logo -->
+  <div class="logo-wrap">
+    <!-- Simple inline kiwi bird SVG -->
+    <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- body -->
+      <ellipse cx="26" cy="30" rx="18" ry="14" fill="#5cb85c" opacity="0.9"/>
+      <!-- head -->
+      <circle cx="38" cy="20" r="9" fill="#5cb85c"/>
+      <!-- beak -->
+      <line x1="44" y1="20" x2="52" y2="18" stroke="#c8a96e" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- eye -->
+      <circle cx="40" cy="17" r="1.8" fill="#fff"/>
+      <circle cx="40.4" cy="17" r="0.9" fill="#111"/>
+      <!-- wing detail -->
+      <path d="M14 28 Q8 34 10 40" stroke="#3d8b3d" stroke-width="2" stroke-linecap="round" fill="none"/>
+      <!-- legs -->
+      <line x1="22" y1="43" x2="20" y2="50" stroke="#c8a96e" stroke-width="2.2" stroke-linecap="round"/>
+      <line x1="30" y1="43" x2="32" y2="50" stroke="#c8a96e" stroke-width="2.2" stroke-linecap="round"/>
+      <!-- feet -->
+      <line x1="20" y1="50" x2="16" y2="51" stroke="#c8a96e" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="20" y1="50" x2="21" y2="52" stroke="#c8a96e" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="32" y1="50" x2="36" y2="51" stroke="#c8a96e" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="32" y1="50" x2="31" y2="52" stroke="#c8a96e" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <!-- Title -->
+  <div class="title-block">
+    <h1>KIWI</h1>
+    <p>Voice Assistant · ESP32-S3</p>
+    <div class="badge" style="margin-top:10px">Firmware v4.0.0</div>
+  </div>
+
+  <!-- Steps -->
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">
+        <strong>USB Cable connect பண்ணுங்க</strong><br/>
+        KIWI device-ஐ PC-யோட USB port-ல போடுங்க. (Data cable use பண்ணுங்க — charge-only வேண்டாம்)
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">
+        <strong>Chrome browser use பண்ணுங்க</strong><br/>
+        இந்த page Chrome அல்லது Edge-ல மட்டுமே work ஆகும்.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">
+        <strong>Flash Firmware கீழே click பண்ணுங்க</strong><br/>
+        Port select பண்ணி, Install-ஐ confirm பண்ணுங்க. 2 நிமிஷத்தில் முடிஞ்சுரும்!
+      </div>
+    </div>
+  </div>
+
+  <!-- Flash Button -->
+  <div class="flash-wrap">
+    <esp-web-install-button manifest="manifest.json">
+      <!-- Shown when browser doesn't support WebSerial -->
+      <div class="browser-warn" slot="unsupported">
+        ⚠️ உங்க browser-ல Web Serial support இல்ல.<br/>
+        <strong>Google Chrome</strong> அல்லது <strong>Microsoft Edge</strong> use பண்ணுங்க.
+      </div>
+    </esp-web-install-button>
+
+    <div class="hint">
+      Flash ஆனதும் device auto-restart ஆகும்.<br/>
+      WiFi setup-க்கு <strong>"KIWI-Setup"</strong> hotspot-ஐ connect பண்ணுங்க.<br/>
+      <br/>
+      Problems? <a href="https://github.com/your-username/kiwi/issues" target="_blank">GitHub Issues</a> ல report பண்ணுங்க.
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  KIWI · Built with ❤️ · Powered by ESP Web Tools
+</footer>
+
+</body>
+</html>
