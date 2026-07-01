@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>KIWI Firmware Flasher</title>
   <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
-   <script type="module" src="https://www.improv-wifi.com/sdk-js/launch-button.js"></script>
   <style>
     :root {
       --green:    #5cb85c;
@@ -151,27 +150,9 @@
     <div class="hint">
       Device will auto-restart after flashing.<br/>
       For WiFi setup, connect to <strong>"KIWI-Setup"</strong> hotspot.
-    </div>
-  <div style="width:100%; border-top:1px solid #2a2a2a; padding-top:16px; text-align:center;">
-      <p style="font-size:0.78rem; color:#777; margin-bottom:12px;">
-        Or configure WiFi directly from browser (Chrome only):
-      </p>
-      <improv-wifi-launch-button>
-        <button slot="activate" style="
-          width:100%; padding:14px;
-          font-size:0.9rem; font-weight:700;
-          letter-spacing:2px; text-transform:uppercase;
-          border-radius:12px; border:1px solid #3d8b3d;
-          cursor:pointer; background:#1e2e1e;
-          color:#7fff5f; transition:background 0.2s;">
-          ⚙️ Configure WiFi
-        </button>
-      </improv-wifi-launch-button>
-    </div>
-
-  </div> <!-- flash-wrap close -->
-
-</div> <!-- card close -->
+    </div>    
+  </div>
+</div> 
 <footer>Kiwistron · Powered by ESP Web Tools</footer>
 
 <script>
